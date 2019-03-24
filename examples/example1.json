@@ -1,0 +1,23 @@
+{
+ "header":{
+  "name":"Test",
+  "source":"",
+  "tact":1,
+  "base":1,
+  "includes":["piano"]
+ },
+ "notes":{
+  "1":{
+   "sounds":["C1","C2"],
+   "types":[4,8],
+   "packs":["piano","piano"],
+   "wait":true
+  },
+  "2":{
+   "sounds":["C3","C4"],
+   "types":[4,8],
+   "packs":["piano","piano"],
+   "wait":true  
+  }
+ }
+}
