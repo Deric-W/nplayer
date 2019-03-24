@@ -64,5 +64,6 @@ while threading.active_count() > 1 and counter < 10: #exit after 1 seconds
 	if debug:
 		print("Threads : " + str(threading.active_count()-1))
 		print("Counter : " + str(counter))
+	time.sleep(0.1)
 if counter >= 10:
 	print("Warning: terminated with " + str(threading.active_count()-1) + " threads remaining")		
