@@ -3,20 +3,31 @@ import threading,time,traceback,json,os,sys,child
 def sanitize(path):
 	return path.replace("/","").replace("\\","")
 
-#args: -p path to mpg123 file
-try:
-	if sys.argv[1] == "-p":
-		playerpath = os.path.abspath(sys.argv[2])
-		file = sys.argv[3]
-	else:
-		if sys.platform[0:3] == "win": #windows
-			playerpath = os.path.abspath("./bin/windows/mpg123.exe")
-		else:
-			playerpath = os.path.abspath("./bin/unix/mpg123")
-		file = sys.argv[1]
-except IndexError:
-	sys.exit("Error: bad parameters")
+#args: -d = debug mode, -p path = playerpath, file = file
+mode = ""
+debug = False
+if sys.platform[0:3] == "win":
+	playerpath = os.path.abspath("./bin/windows/mpg123.exe")
+else:
+	playerpath = os.path.abspath("./bin/unix/mpg123")
 
+for param in sys.argv[1:]:
+	if mode == "-p":
+		playerpath = os.path.abspath(param)
+		mode = ""
+	else:
+		if param == "-p":
+			mode = "-p"
+		elif param == "-d":
+			debug = True
+		else:
+			file = os.path.abspath(param)
+if debug:
+	print("Argv : " + str(sys.argv[1:]))
+	print("Debug : True")
+	print("Playerpath : " + str(playerpath))
+	print("File : " + file)
+			
 file_content = json.load(open(file,"r"))
 tact = file_content["header"]["tact"]
 base = file_content["header"]["base"]
@@ -27,28 +38,31 @@ for include in file_content["header"]["includes"]:
 		packdb[include] = [packdata["samplerate"],os.path.abspath("./packs/" + sanitize(include)),sanitize(packdata["extension"])]
 	except:
 		sys.exit("Error: failed to include " + include)
-#print(packdb)
-#print(playerpath)
+if debug:
+	print("Packdb : " + str(packdb),end="\n\n")
+
 for group in file_content["notes"]:
 	counter = 0
 	for sound in file_content["notes"][group]["sounds"]:
 		file = packdb[file_content["notes"][group]["packs"][counter]]
 		file = file[1] + "/" + sanitize(sound) + file[2]
 		frames = base * ((1/file_content["notes"][group]["types"][counter])/tact) * packdb[file_content["notes"][group]["packs"][counter]][0]   #base * (type/tact) * samplerate
-		#print(playerpath)
-		#print(file)
-		#print(frames)
-		#print()
+		if debug:
+			print("Playerpath : " + str(playerpath))
+			print("File : " + file)
+			print("Frames : " + str(frames),end="\n\n")
 		threading.Thread(target=child.run,daemon=True,args=(playerpath,file,frames/1000)).start()
 		counter = counter + 1
 	if file_content["notes"][group]["wait"]:
-			#print(base * (sorted(file_content["notes"][group]["types"])[-1]/tact))
-			time.sleep(int(base * (1/sorted(file_content["notes"][group]["types"])[-1]/tact)))
+			if debug:	
+				print("Wait : " + str(base * (1/sorted(file_content["notes"][group]["types"])[0]/tact)),end="\n\n\n")
+			time.sleep(int(base * (1/sorted(file_content["notes"][group]["types"])[0]/tact)))
 
 counter = 0
-while threading.active_count() > 1 and counter < 10: #Abbruch nach 1 Sekunden
-	time.sleep(0.1)
+while threading.active_count() > 1 and counter < 10: #exit after 1 seconds
 	counter = counter + 1
-	#print(threading.active_count())
+	if debug:
+		print("Threads : " + str(threading.active_count()-1))
+		print("Counter : " + str(counter))
 if counter >= 10:
 	print("Warning: terminated with " + str(threading.active_count()-1) + " threads remaining")		
