@@ -9,6 +9,6 @@ Python script wich plays notes stored in a json file with mpg123.
   - Note: each value in sounds needs a value with the same index in types and packs.
  
 ## Packs:
- - a Pack is a directory in <directory with nplayer.py>/packs/ with sounds and a pack.json
+ - a Pack is a directory in ` <directory with nplayer.py> `/packs/ with sounds and a pack.json
  - the pack.json contains the samplerate and the file extension of the files in the directory.
  - for examples take a look in "packs".
